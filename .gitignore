@@ -1,4 +1,5 @@
 node_modules/
 .ui2code/
+dist/
 *.log
 .DS_Store
