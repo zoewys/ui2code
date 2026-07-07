@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>UI2Code</title>
+  <style>
+    :root {
+      --bg: #f8f9fc;
+      --surface: #ffffff;
+      --border: #e2e5ed;
+      --text: #1a1d27;
+      --text-secondary: #6b7185;
+      --accent: #7c3aed;
+      --accent-light: #ede9fe;
+      --success: #22c55e;
+      --error: #ef4444;
+      --warning: #f59e0b;
+      --radius: 10px;
+      --shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ── Top Bar ── */
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+    .topbar input[type="text"] {
+      flex: 1;
+      padding: 6px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 13px;
+      outline: none;
+    }
+    .topbar input:focus { border-color: var(--accent); }
+    .topbar button {
+      padding: 6px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+    .topbar button:hover { background: var(--accent-light); }
+    .topbar button.active {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    /* ── Main Layout ── */
+    .main {
+      display: flex;
+      height: calc(100vh - 45px);
+    }
+
+    /* ── Preview Panel (Left) ── */
+    .preview-panel {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      background: #f0f0f3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .preview-panel .placeholder {
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 14px;
+      padding: 40px;
+    }
+    .preview-panel .placeholder .icon { font-size: 48px; margin-bottom: 12px; }
+    .preview-panel img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      cursor: crosshair;
+    }
+    .preview-panel .highlight-overlay {
+      position: absolute;
+      border: 2px solid var(--accent);
+      background: rgba(124, 58, 237, 0.08);
+      pointer-events: none;
+      display: none;
+      border-radius: 2px;
+    }
+    .preview-panel .loading-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,0.8);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+    .preview-panel .loading-overlay.active { display: flex; }
+
+    /* ── Side Panel (Right) ── */
+    .side-panel {
+      width: 320px;
+      min-width: 280px;
+      border-left: 1px solid var(--border);
+      background: var(--surface);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .panel-section {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .panel-section h3 {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    /* Selected Element */
+    .element-preview {
+      background: #f5f3ff;
+      border: 1px solid #ddd6fe;
+      border-radius: 6px;
+      padding: 8px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 11px;
+      line-height: 1.5;
+      max-height: 120px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+      color: var(--accent);
+    }
+    .element-preview.empty {
+      color: var(--text-secondary);
+      background: var(--bg);
+      border-color: var(--border);
+      font-family: inherit;
+    }
+
+    /* Instruction */
+    .instruction-area textarea {
+      width: 100%;
+      height: 80px;
+      padding: 8px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: inherit;
+      resize: vertical;
+      outline: none;
+    }
+    .instruction-area textarea:focus { border-color: var(--accent); }
+    .instruction-area .actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .btn-primary {
+      flex: 1;
+      padding: 8px 16px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-primary:hover { background: #6d28d9; }
+    .btn-primary:disabled { background: #c4b5fd; cursor: not-allowed; }
+    .btn-secondary {
+      padding: 8px 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .btn-secondary:hover { background: var(--bg); }
+
+    /* Reference Image */
+    .ref-image-area {
+      border: 2px dashed var(--border);
+      border-radius: 6px;
+      padding: 12px;
+      text-align: center;
+      cursor: pointer;
+      color: var(--text-secondary);
+      font-size: 12px;
+      transition: border-color 0.15s;
+    }
+    .ref-image-area:hover { border-color: var(--accent); }
+    .ref-image-area.has-image {
+      padding: 4px;
+      border-style: solid;
+      border-color: var(--accent);
+    }
+    .ref-image-area img {
+      max-width: 100%;
+      max-height: 100px;
+      border-radius: 4px;
+    }
+
+    /* History */
+    .history-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 12px;
+    }
+    .history-entry {
+      padding: 8px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      margin-bottom: 6px;
+      font-size: 12px;
+      cursor: default;
+    }
+    .history-entry .meta {
+      display: flex;
+      justify-content: space-between;
+      color: var(--text-secondary);
+      font-size: 10px;
+      margin-bottom: 4px;
+    }
+    .history-entry .instruction {
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .history-entry .similarity {
+      display: inline-block;
+      padding: 1px 6px;
+      border-radius: 10px;
+      font-size: 10px;
+      font-weight: 600;
+    }
+    .sim-high { background: #dcfce7; color: #166534; }
+    .sim-mid { background: #fef9c3; color: #854d0e; }
+    .sim-low { background: #fee2e2; color: #991b1b; }
+
+    .empty-state {
+      color: var(--text-secondary);
+      font-size: 12px;
+      text-align: center;
+      padding: 20px;
+    }
+
+    /* Status toast */
+    .toast {
+      position: fixed;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      color: white;
+      z-index: 9999;
+      display: none;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    }
+    .toast.info { background: var(--accent); }
+    .toast.success { background: var(--success); }
+    .toast.error { background: var(--error); }
+    .toast.visible { display: block; }
+  </style>
+</head>
+<body>
+  <!-- Top Bar -->
+  <div class="topbar">
+    <input type="text" id="url-input" placeholder="Dev server URL (e.g. http://localhost:3000)" />
+    <button id="btn-capture" title="Capture screenshot">📸 Capture</button>
+    <button id="btn-refresh" title="Refresh screenshot">🔄</button>
+    <button id="btn-undo" title="Undo last change">⟲ Undo</button>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+    <!-- Preview -->
+    <div class="preview-panel">
+      <div class="placeholder" id="placeholder">
+        <div class="icon">🎯</div>
+        <div>Enter a URL and click <b>📸 Capture</b><br>to load your page screenshot</div>
+      </div>
+      <img id="screenshot-img" style="display:none" />
+      <div class="highlight-overlay" id="highlight-overlay"></div>
+      <div class="loading-overlay" id="loading-overlay">
+        <span>⏳ Capturing screenshot...</span>
+      </div>
+    </div>
+
+    <!-- Side Panel -->
+    <div class="side-panel">
+      <!-- Selected Element -->
+      <div class="panel-section">
+        <h3>🎯 Selected Element</h3>
+        <div class="element-preview empty" id="element-preview">
+          Click on the screenshot to select an element
+        </div>
+      </div>
+
+      <!-- Instruction -->
+      <div class="panel-section instruction-area">
+        <h3>✏️ Instruction</h3>
+        <textarea id="instruction-input" placeholder="Describe the change you want...&#10;e.g. &quot;Make it rounded with a blue gradient background&quot;"></textarea>
+        <div class="actions">
+          <button class="btn-primary" id="btn-execute" disabled>▶ Execute Refine</button>
+        </div>
+      </div>
+
+      <!-- Reference Image -->
+      <div class="panel-section">
+        <h3>🖼️ Reference Image</h3>
+        <div class="ref-image-area" id="ref-image-area">
+          📎 Click or drag to upload a reference screenshot
+          <input type="file" id="ref-file-input" accept="image/*" style="display:none" />
+        </div>
+      </div>
+
+      <!-- History -->
+      <div class="panel-section" style="flex:1; display:flex; flex-direction:column; overflow:hidden; border-bottom:none;">
+        <h3>📜 History</h3>
+        <div class="history-list" id="history-list">
+          <div class="empty-state">No modifications yet</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script type="module">
+    // ── State ──
+    let rpcId = 0;
+    const pendingRequests = new Map();
+    let toolOutput = null;
+    let selectedElement = null;
+    let referenceImageBase64 = null;
+    let screenshotBase64 = null;
+    let screenshotWidth = 0;
+    let screenshotHeight = 0;
+
+    // ── DOM refs ──
+    const urlInput = document.getElementById("url-input");
+    const btnCapture = document.getElementById("btn-capture");
+    const btnRefresh = document.getElementById("btn-refresh");
+    const btnUndo = document.getElementById("btn-undo");
+    const placeholder = document.getElementById("placeholder");
+    const screenshotImg = document.getElementById("screenshot-img");
+    const highlightOverlay = document.getElementById("highlight-overlay");
+    const loadingOverlay = document.getElementById("loading-overlay");
+    const elementPreview = document.getElementById("element-preview");
+    const instructionInput = document.getElementById("instruction-input");
+    const btnExecute = document.getElementById("btn-execute");
+    const refImageArea = document.getElementById("ref-image-area");
+    const refFileInput = document.getElementById("ref-file-input");
+    const historyList = document.getElementById("history-list");
+    const toast = document.getElementById("toast");
+
+    // ── MCP Apps Bridge (JSON-RPC 2.0 over postMessage) ──
+    const rpcNotify = (method, params) => {
+      window.parent.postMessage({ jsonrpc: "2.0", method, params }, "*");
+    };
+
+    const rpcRequest = (method, params) =>
+      new Promise((resolve, reject) => {
+        const id = ++rpcId;
+        pendingRequests.set(id, { resolve, reject });
+        window.parent.postMessage({ jsonrpc: "2.0", id, method, params }, "*");
+      });
+
+    window.addEventListener("message", (event) => {
+      if (event.source !== window.parent) return;
+      const msg = event.data;
+      if (!msg || msg.jsonrpc !== "2.0") return;
+
+      // Response to our request
+      if (typeof msg.id === "number") {
+        const pending = pendingRequests.get(msg.id);
+        if (!pending) return;
+        pendingRequests.delete(msg.id);
+        if (msg.error) {
+          pending.reject(msg.error);
+        } else {
+          pending.resolve(msg.result);
+        }
+        return;
+      }
+
+      // Notification from host
+      if (msg.method === "ui/notifications/tool-result") {
+        toolOutput = msg.params?.structuredContent ?? null;
+        onToolOutput();
+      }
+    }, { passive: true });
+
+    // Initialize bridge
+    const bridgeReady = (async () => {
+      try {
+        await rpcRequest("ui/initialize", {
+          appInfo: { name: "ui2code-widget", version: "0.1.0" },
+          appCapabilities: {},
+          protocolVersion: "2026-01-26",
+        });
+        rpcNotify("ui/notifications/initialized", {});
+      } catch (e) {
+        console.warn("Bridge init failed (standalone mode?):", e);
+      }
+    })();
+
+    // ── Tool Output Handler ──
+    function onToolOutput() {
+      if (!toolOutput) return;
+      if (toolOutput.devServerUrl) {
+        urlInput.value = toolOutput.devServerUrl;
+      }
+      // Auto-capture if URL provided
+      if (toolOutput.devServerUrl && !screenshotBase64) {
+        captureScreenshot();
+      }
+    }
+
+    // ── Screenshot Capture ──
+    async function captureScreenshot() {
+      const url = urlInput.value.trim();
+      if (!url) {
+        showToast("Please enter a URL", "error");
+        return;
+      }
+
+      loadingOverlay.classList.add("active");
+      try {
+        await bridgeReady;
+        const result = await rpcRequest("tools/call", {
+          name: "capture_screenshot",
+          arguments: { url },
+        });
+
+        const data = result?.structuredContent;
+        if (!data?.imageBase64) {
+          showToast("Failed to capture screenshot", "error");
+          return;
+        }
+
+        screenshotBase64 = data.imageBase64;
+        screenshotWidth = data.width;
+        screenshotHeight = data.height;
+
+        screenshotImg.src = "data:image/png;base64," + screenshotBase64;
+        screenshotImg.style.display = "block";
+        placeholder.style.display = "none";
+        highlightOverlay.style.display = "none";
+
+        // Clear previous selection
+        clearSelection();
+        showToast("Screenshot captured", "success");
+      } catch (e) {
+        showToast("Capture failed: " + (e.message || e), "error");
+      } finally {
+        loadingOverlay.classList.remove("active");
+      }
+    }
+
+    // ── Element Selection (click on screenshot) ──
+    screenshotImg.addEventListener("click", async (e) => {
+      if (!screenshotBase64) return;
+
+      const rect = screenshotImg.getBoundingClientRect();
+      const scaleX = screenshotWidth / rect.width;
+      const scaleY = screenshotHeight / rect.height;
+      const x = Math.round((e.clientX - rect.left) * scaleX);
+      const y = Math.round((e.clientY - rect.top) * scaleY);
+
+      loadingOverlay.querySelector("span").textContent = "⏳ Identifying element...";
+      loadingOverlay.classList.add("active");
+
+      try {
+        await bridgeReady;
+        const result = await rpcRequest("tools/call", {
+          name: "identify_element_at_point",
+          arguments: {
+            url: urlInput.value.trim(),
+            x, y,
+            viewportWidth: screenshotWidth,
+            viewportHeight: screenshotHeight,
+          },
+        });
+
+        const info = result?.structuredContent;
+        if (!info) {
+          showToast("No element found at that position", "warning");
+          return;
+        }
+
+        selectedElement = info;
+
+        // Show element preview
+        const tag = info.tagName;
+        const cls = info.classList?.length ? "." + info.classList.join(".") : "";
+        const id = info.id ? "#" + info.id : "";
+        elementPreview.textContent = `<${tag}${id}${cls}>\n${info.context}\n\n${info.outerHTML?.substring(0, 500) || ""}`;
+        elementPreview.classList.remove("empty");
+
+        // Show highlight overlay
+        if (info.boundingRect) {
+          const br = info.boundingRect;
+          const ox = br.x / scaleX + rect.left - screenshotImg.parentElement.getBoundingClientRect().left;
+          const oy = br.y / scaleY + rect.top - screenshotImg.parentElement.getBoundingClientRect().top;
+          const ow = br.width / scaleX;
+          const oh = br.height / scaleY;
+          highlightOverlay.style.left = ox + "px";
+          highlightOverlay.style.top = oy + "px";
+          highlightOverlay.style.width = ow + "px";
+          highlightOverlay.style.height = oh + "px";
+          highlightOverlay.style.display = "block";
+        }
+
+        // Save selection state
+        await rpcRequest("tools/call", {
+          name: "save_ui2code_selection",
+          arguments: {
+            projectDir: toolOutput?.projectDir || ".",
+            selection: info,
+          },
+        });
+
+        btnExecute.disabled = false;
+        showToast(`Selected: <${tag}${id}${cls}>`, "info");
+      } catch (e) {
+        showToast("Element identification failed: " + (e.message || e), "error");
+      } finally {
+        loadingOverlay.classList.remove("active");
+        loadingOverlay.querySelector("span").textContent = "⏳ Capturing screenshot...";
+      }
+    });
+
+    // ── Execute Refine ──
+    btnExecute.addEventListener("click", async () => {
+      const instruction = instructionInput.value.trim();
+      if (!instruction) {
+        showToast("Please enter an instruction", "error");
+        return;
+      }
+      if (!selectedElement) {
+        showToast("Please select an element first", "error");
+        return;
+      }
+
+      await bridgeReady;
+
+      // Build the message content
+      const content = [
+        {
+          type: "text",
+          text: [
+            `Refine the selected UI element.`,
+            ``,
+            `**Selected element:** \`${selectedElement.context}\``,
+            `**Tag:** ${selectedElement.tagName}`,
+            `**Element HTML (excerpt):**`,
+            "```html",
+            selectedElement.outerHTML?.substring(0, 2000) || "",
+            "```",
+            ``,
+            `**Instruction:** ${instruction}`,
+            ``,
+            `**Page URL:** ${urlInput.value.trim()}`,
+          ].join("\n"),
+        },
+      ];
+
+      // Add reference image if present
+      if (referenceImageBase64) {
+        content.push({
+          type: "text",
+          text: "\n\n**Reference image attached** — match this visual style.",
+        });
+      }
+
+      // Send follow-up message to trigger the refine skill
+      rpcNotify("ui/message", { role: "user", content });
+
+      showToast("Refine request sent to AI", "info");
+      btnExecute.disabled = true;
+
+      // Auto-refresh after a delay to see changes
+      setTimeout(async () => {
+        await captureScreenshot();
+        btnExecute.disabled = false;
+        await loadHistory();
+      }, 8000);
+    });
+
+    // ── Reference Image Upload ──
+    refImageArea.addEventListener("click", () => refFileInput.click());
+    refImageArea.addEventListener("dragover", (e) => { e.preventDefault(); refImageArea.style.borderColor = "var(--accent)"; });
+    refImageArea.addEventListener("dragleave", () => { refImageArea.style.borderColor = ""; });
+    refImageArea.addEventListener("drop", (e) => {
+      e.preventDefault();
+      refImageArea.style.borderColor = "";
+      const file = e.dataTransfer?.files?.[0];
+      if (file) loadRefImage(file);
+    });
+    refFileInput.addEventListener("change", () => {
+      if (refFileInput.files?.[0]) loadRefImage(refFileInput.files[0]);
+    });
+
+    function loadRefImage(file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        referenceImageBase64 = reader.result.split(",")[1];
+        refImageArea.innerHTML = `<img src="${reader.result}" />`;
+        refImageArea.classList.add("has-image");
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // ── History ──
+    async function loadHistory() {
+      try {
+        await bridgeReady;
+        const result = await rpcRequest("tools/call", {
+          name: "get_refine_history",
+          arguments: { projectDir: toolOutput?.projectDir || "." },
+        });
+
+        const data = result?.structuredContent;
+        if (!data?.entries?.length) {
+          historyList.innerHTML = '<div class="empty-state">No modifications yet</div>';
+          return;
+        }
+
+        historyList.innerHTML = data.entries.map((e) => {
+          const simClass = e.similarity >= 0.95 ? "sim-high" : e.similarity >= 0.85 ? "sim-mid" : "sim-low";
+          const simPct = Math.round((e.similarity || 0) * 100);
+          const time = e.timestamp ? new Date(e.timestamp).toLocaleTimeString() : "";
+          return `
+            <div class="history-entry">
+              <div class="meta">
+                <span>${time}</span>
+                <span class="similarity ${simClass}">${simPct}%</span>
+              </div>
+              <div class="instruction">${escapeHtml(e.instruction || "")}</div>
+            </div>
+          `;
+        }).reverse().join("");
+      } catch {
+        // Ignore history load errors
+      }
+    }
+
+    // ── Undo ──
+    btnUndo.addEventListener("click", async () => {
+      await bridgeReady;
+      rpcNotify("ui/message", {
+        role: "user",
+        content: [{ type: "text", text: "Undo the last UI2Code refinement." }],
+      });
+      showToast("Undo request sent", "info");
+      setTimeout(async () => {
+        await captureScreenshot();
+        await loadHistory();
+      }, 3000);
+    });
+
+    // ── Refresh ──
+    btnCapture.addEventListener("click", captureScreenshot);
+    btnRefresh.addEventListener("click", captureScreenshot);
+
+    // ── Keyboard shortcuts ──
+    instructionInput.addEventListener("keydown", (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+        e.preventDefault();
+        btnExecute.click();
+      }
+    });
+
+    // ── Helpers ──
+    function clearSelection() {
+      selectedElement = null;
+      elementPreview.textContent = "Click on the screenshot to select an element";
+      elementPreview.classList.add("empty");
+      highlightOverlay.style.display = "none";
+      btnExecute.disabled = true;
+    }
+
+    function showToast(msg, type = "info") {
+      toast.textContent = msg;
+      toast.className = "toast " + type + " visible";
+      clearTimeout(toast._timer);
+      toast._timer = setTimeout(() => { toast.classList.remove("visible"); }, 3000);
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+  </script>
+</body>
+</html>

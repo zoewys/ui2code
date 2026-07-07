@@ -1,0 +1,4 @@
+node_modules/
+.ui2code/
+*.log
+.DS_Store

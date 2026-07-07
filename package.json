@@ -1,0 +1,16 @@
+{
+  "name": "ui2code",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Codex plugin — select DOM elements and refine UI with AI",
+  "scripts": {
+    "start": "node scripts/start-mcp.mjs",
+    "test:mcp": "echo '{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\",\"params\":{\"protocolVersion\":\"2025-11-25\"}}' | node scripts/start-mcp.mjs"
+  },
+  "dependencies": {
+    "pixelmatch": "^6.0.0",
+    "playwright": "^1.52.0",
+    "pngjs": "^7.0.0"
+  }
+}

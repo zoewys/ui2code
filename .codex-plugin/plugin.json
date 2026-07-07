@@ -1,0 +1,37 @@
+{
+  "name": "ui2code",
+  "version": "0.1.0",
+  "description": "Select DOM elements and refine UI with AI — visual preview, screenshot comparison, and iterative fixes.",
+  "author": {
+    "name": "siyuan"
+  },
+  "keywords": [
+    "ui",
+    "design",
+    "refine",
+    "screenshot",
+    "dom",
+    "visual-diff"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "UI2Code",
+    "shortDescription": "Select elements, describe changes, let AI refine your UI.",
+    "longDescription": "UI2Code lets you open any dev-server page inside Codex, click to select a DOM element, describe the change you want in natural language or with a reference screenshot, and watch the AI modify your source code — then verify the result with automated screenshot comparison and iterative refinement.",
+    "developerName": "siyuan",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "brandColor": "#7c3aed",
+    "logo": "./assets/logo.png",
+    "composerIcon": "./assets/logo.png",
+    "defaultPrompt": [
+      "Open UI2Code for this project",
+      "Undo the last UI change"
+    ]
+  }
+}

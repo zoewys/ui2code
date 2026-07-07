@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "ui2code_mcp": {
+      "title": "UI2Code MCP Server",
+      "description": "Screenshot capture, element identification, visual diff, and refine history for the UI2Code widget.",
+      "command": "node",
+      "args": ["./scripts/start-mcp.mjs"],
+      "cwd": "."
+    }
+  }
+}
