@@ -1,6 +1,6 @@
 {
   "name": "ui2code",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Select DOM elements and refine UI with AI — visual preview, screenshot comparison, and iterative fixes.",
   "author": {
     "name": "siyuan"

@@ -315,7 +315,7 @@ async function handleRequest(id, method, params) {
       return sendResult(id, {
         protocolVersion: "2025-11-25",
         capabilities: { tools: {}, resources: {} },
-        serverInfo: { name: "UI2Code MCP", version: "0.1.0" },
+        serverInfo: { name: "UI2Code MCP", version: "0.1.1" },
         instructions:
           "Use render_ui2code_widget to open the UI refinement widget. " +
           "Use capture_screenshot, identify_element_at_point, compare_screenshots for visual analysis. " +
